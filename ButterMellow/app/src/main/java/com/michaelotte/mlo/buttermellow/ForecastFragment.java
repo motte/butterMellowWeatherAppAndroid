@@ -1,5 +1,7 @@
 package com.michaelotte.mlo.buttermellow;
+import com.michaelotte.mlo.buttermellow.WeatherDataParser;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,9 +21,15 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by michael on 10/6/14.
@@ -31,6 +39,11 @@ import java.util.List;
  * fragment is a modular container
  */
 public class ForecastFragment extends Fragment {
+
+    /**
+     * Global mForecastAdapter data
+     */
+    private ArrayAdapter<String> mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -55,7 +68,8 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute();
+            // weatherTask.execute("5393052"); 539052 is a Santa Cruz, city ID; 5375480 is Mtn View
+            weatherTask.execute("5375480");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -89,7 +103,7 @@ public class ForecastFragment extends Fragment {
          * It also considers the orders of the views
          * This will pass along the view information to the bound view itself
          */
-        ArrayAdapter<String> forecastAdapter =
+        mForecastAdapter =
                 new ArrayAdapter<String>(
                         // The current context (this fragment's parent activity that are global)
                         getActivity(),
@@ -100,27 +114,63 @@ public class ForecastFragment extends Fragment {
 
         ListView listView = (ListView) rootView.findViewById(
                 R.id.listview_forecast);
-        listView.setAdapter(forecastAdapter);
+        listView.setAdapter(mForecastAdapter);
 
 
         return rootView;
     }
 
-    public class FetchWeatherTask extends AsyncTask<Void, Void, Void> {
+    public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected void onPostExecute(String[] result) {
+            /**
+             * Initialize new forecast data after data is retrieved from OWM API
+             */
+            if (result != null) {
+                mForecastAdapter.clear();
+                for (String dayForecastStr : result) {
+                    mForecastAdapter.add(dayForecastStr);
+                }
+            }
+        }
+
+        @Override
+        protected String[] doInBackground(String... params) {
+
+            // If there's no zip code, there's nothing to look up.  Verify size of params.
+            if (params.length == 0) {
+                return null;
+            }
+
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
             String forecastJsonStr = null;
 
+            String format = "json";
+            String units = "metric";
+            int numDays = 7;
+
             try {
-                String cityId = "5393052";
-                String urlStr = "http://api.openweathermap.org/data/2.5/forecast/daily?&mode=json&units=metric&cnt=7&id=" + cityId;
-                URL url = new URL(urlStr);
+                final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?";
+                final String ID_PARAM = "id";
+                final String FORMAT_PARAM = "mode";
+                final String UNITS_PARAM = "units";
+                final String DAYS_PARAM = "cnt";
+
+                Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+                        .appendQueryParameter(ID_PARAM, params[0])
+                        .appendQueryParameter(FORMAT_PARAM, format)
+                        .appendQueryParameter(UNITS_PARAM, units)
+                        .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                        .build();
+
+                URL url = new URL(builtUri.toString());
+
+                Log.v(LOG_TAG, "Built URI " + builtUri.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -145,6 +195,7 @@ public class ForecastFragment extends Fragment {
                 }
                 forecastJsonStr = buffer.toString();
 
+
                 Log.v(LOG_TAG, "Forecast JSON String: " + forecastJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "ForecastFragment 119 Error ", e);
@@ -162,6 +213,15 @@ public class ForecastFragment extends Fragment {
                     }
                 }
             }
+
+            try {
+                WeatherDataParser WDP = new WeatherDataParser();
+                return WDP.getWeatherDataFromJson(forecastJsonStr, numDays);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
             return null;
         }
     }
