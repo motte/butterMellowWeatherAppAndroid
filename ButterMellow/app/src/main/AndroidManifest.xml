@@ -1,3 +1,4 @@
+<<<<<<< Original
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.michaelotte.mlo.buttermellow" >
@@ -17,6 +18,20 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.michaelotte.mlo.buttermellow.DetailActivity"
+            android:label="@string/title_activity_detail"
+            android:parentActivityName="com.michaelotte.mlo.buttermellow.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.michaelotte.mlo.buttermellow.MainActivity" />
+        </activity>
+        <activity android:name="com.michaelotte.mlo.buttermellow.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="com.michaelotte.mlo.buttermellow.MainActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.michaelotte.mlo.buttermellow.MainActivity" />
         </activity>
     </application>
 

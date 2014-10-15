@@ -1,6 +1,6 @@
 package com.michaelotte.mlo.buttermellow;
-import com.michaelotte.mlo.buttermellow.WeatherDataParser;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -124,6 +124,12 @@ public class ForecastFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String forecast = mForecastAdapter.getItem(position);
                 Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
+                // Launch the detailActivity intent
+                // Intents help two disparate components of an app or outside an app to be connected
+                // Here's an explicit intent to open up the DetailActivity View
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, forecast);
+                startActivity(detailIntent);
             }
         });
 
