@@ -18,12 +18,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.michaelotte.mlo.buttermellow.DetailActivity"
+        <activity android:name="com.michaelotte.mlo.buttermellow.DetailActivity"
             android:label="@string/title_activity_detail"
             android:parentActivityName="com.michaelotte.mlo.buttermellow.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.michaelotte.mlo.buttermellow.MainActivity" />
         </activity>
         <activity android:name="com.michaelotte.mlo.buttermellow.SettingsActivity"
