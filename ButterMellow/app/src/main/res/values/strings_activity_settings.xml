@@ -10,14 +10,14 @@
     <string name="pref_description_social_recommendations">Recommendations for people to contact based on your message history</string>
 
     <!-- [Char Limit = 30] because it is user visible -->
-    <string name="pref_location_title">Where Are You?</string>
+    <string name="pref_location_title">Where Are You? Give me a city ID.</string>
     <!-- Location preference setting key - no char limit -->
     <string name="pref_location_key">location</string>
     <!-- Location preference setting default value - no char limit -->
     <string name="pref_default_location">5393052</string>
 
     <string name="pref_units_key">units</string>
-    <string name="pref_units_title">Pick Your Units</string>
+    <string name="pref_units_title">Pick Your Units.</string>
     <string name="pref_units_default">0</string>
     <string-array name="pref_units_list_titles">
         <item>Metric</item>
