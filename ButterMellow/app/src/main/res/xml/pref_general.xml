@@ -1,4 +1,5 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Your Preferences"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -12,7 +13,8 @@
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
         android:key="@string/pref_location_key"
-        android:title="@string/pref_location_label"
+        android:title="@string/pref_location_title"
+        android:summary="Pick your forecast location."
         android:defaultValue="@string/pref_default_location"
         android:maxLength="30"
         android:selectAllOnFocus="true"
@@ -27,10 +29,11 @@
     <!-- This is the radio button list -->
     <ListPreference
         android:key="@string/pref_units_key"
-        android:title="@string/pref_title_add_friends_to_messages"
-        android:defaultValue="-1"
-        android:entries="@array/pref_example_list_titles"
-        android:entryValues="@array/pref_example_list_values"
+        android:title="@string/pref_units_title"
+        android:summary="What's your unit of choice? Default is metric."
+        android:defaultValue="@string/pref_units_default"
+        android:entries="@array/pref_units_list_titles"
+        android:entryValues="@array/pref_units_list_values"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
 
