@@ -16,6 +16,8 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                // Here you can list all the intents that Buttermellow app can handle
+                // ex: handling push notifications/actions
             </intent-filter>
         </activity>
         <activity android:name="com.michaelotte.mlo.buttermellow.DetailActivity"

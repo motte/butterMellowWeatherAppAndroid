@@ -1,6 +1,10 @@
 package com.michaelotte.mlo.buttermellow;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,6 +40,23 @@ public class WeatherDataParser {
 
         String highLowStr = roundedHigh + "/" + roundedLow;
         return highLowStr;
+    }
+
+    public String getCityDataFromJson(String forecastJsonStr)
+            throws JSONException {
+        final String OWM_CITY = "city";
+        final String OWM_COORD = "coord";
+        final String OWM_LAT = "lat";
+        final String OWM_LON = "lon";
+
+        JSONObject forecastJson = new JSONObject(forecastJsonStr);
+
+        JSONObject weatherCityObject = forecastJson.getJSONObject(OWM_CITY);
+        JSONObject weatherCoordObject = weatherCityObject.getJSONObject(OWM_COORD);
+        String latString = weatherCoordObject.getString(OWM_LAT);
+        String lonString = weatherCoordObject.getString(OWM_LON);
+
+        return latString + " " + lonString;
     }
 
     /**

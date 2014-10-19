@@ -1,5 +1,6 @@
 package com.michaelotte.mlo.buttermellow;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -43,6 +44,7 @@ import org.json.JSONObject;
  * fragment is a modular container
  */
 public class ForecastFragment extends Fragment {
+    private String latLon;
 
     /**
      * Global mForecastAdapter data
@@ -123,7 +125,7 @@ public class ForecastFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String forecast = mForecastAdapter.getItem(position);
-                Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
                 // Launch the detailActivity intent
                 // Intents help two disparate components of an app or outside an app to be connected
                 // Here's an explicit intent to open up the DetailActivity View
@@ -138,12 +140,19 @@ public class ForecastFragment extends Fragment {
 
     private void updateWeather() {
         FetchWeatherTask weatherTask = new FetchWeatherTask();
-        String location = PreferenceManager.getDefaultSharedPreferences(getActivity())
-                .getString(getString(R.string.pref_location_key),
-                        getString(R.string.pref_default_location));
-        String units = PreferenceManager.getDefaultSharedPreferences(getActivity())
-                .getString(getString(R.string.pref_units_key), getString(R.string.pref_units_default));
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        String location = sharedPrefs.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_default_location));
+        String units = sharedPrefs.getString(getString(R.string.pref_units_key),
+                getString(R.string.pref_units_default));
         weatherTask.execute(location, units);
+
+        // Save the latLon for the map menu option
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString("latLon", latLon);
+        editor.apply();
+        Toast.makeText(getActivity(), latLon, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -242,6 +251,7 @@ public class ForecastFragment extends Fragment {
 
             try {
                 WeatherDataParser WDP = new WeatherDataParser();
+                latLon = WDP.getCityDataFromJson(forecastJsonStr);
                 return WDP.getWeatherDataFromJson(forecastJsonStr, numDays);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
