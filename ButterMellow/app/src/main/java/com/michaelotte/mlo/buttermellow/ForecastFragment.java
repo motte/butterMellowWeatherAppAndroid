@@ -70,8 +70,8 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             FetchWeatherTask weatherTask = new FetchWeatherTask();
-            // weatherTask.execute("5393052"); 539052 is a Santa Cruz, city ID; 5375480 is Mtn View
-            weatherTask.execute("5375480");
+            // weatherTask.execute("5393052"); 5393052 is a Santa Cruz, city ID; 5375480 is Mtn View
+            weatherTask.execute("5393052");
             return true;
         }
         return super.onOptionsItemSelected(item);

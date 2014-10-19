@@ -9,8 +9,12 @@
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact based on your message history</string>
 
-    <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
+    <!-- [Char Limit = 30] because it is user visible -->
+    <string name="pref_location_label">Location Setting</string>
+    <!-- Location preference setting key - no char limit -->
+    <string name="pref_location_key">location</string>
+    <!-- Location preference setting default value - no char limit -->
+    <string name="pref_default_display_name">539052</string>
 
     <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
     <string-array name="pref_example_list_titles">

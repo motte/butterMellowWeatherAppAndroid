@@ -1,4 +1,6 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <CheckBoxPreference
         android:key="example_checkbox"
@@ -9,11 +11,11 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
-        android:key="example_text"
-        android:title="@string/pref_title_display_name"
+        android:key="@string/pref_location_key"
+        android:title="@string/pref_location_label"
         android:defaultValue="@string/pref_default_display_name"
         android:selectAllOnFocus="true"
-        android:inputType="textCapWords"
+        android:inputType="text"
         android:capitalize="words"
         android:singleLine="true"
         android:maxLines="1" />
