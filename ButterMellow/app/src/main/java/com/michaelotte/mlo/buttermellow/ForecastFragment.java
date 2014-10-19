@@ -1,9 +1,11 @@
 package com.michaelotte.mlo.buttermellow;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -70,8 +72,13 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             FetchWeatherTask weatherTask = new FetchWeatherTask();
+            // Get location = city_id from preferences, but default to 5393052 (Santa Cruz, CA)
+            // Chose this location because I want to make sure the location methods are separate
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String location = prefs.getString(getString(R.string.pref_location_key),
+                            getString(R.string.pref_default_location));
             // weatherTask.execute("5393052"); 5393052 is a Santa Cruz, city ID; 5375480 is Mtn View
-            weatherTask.execute("5393052");
+            weatherTask.execute(location);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -155,7 +162,6 @@ public class ForecastFragment extends Fragment {
 
         @Override
         protected String[] doInBackground(String... params) {
-
             // If there's no zip code, there's nothing to look up.  Verify size of params.
             if (params.length == 0) {
                 return null;
