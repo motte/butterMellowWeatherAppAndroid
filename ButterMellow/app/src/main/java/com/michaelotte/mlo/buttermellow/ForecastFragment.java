@@ -45,6 +45,7 @@ import org.json.JSONObject;
  */
 public class ForecastFragment extends Fragment {
     private String latLon;
+    private final String LOG_TAG = ForecastFragment.class.getSimpleName();
 
     /**
      * Global mForecastAdapter data
@@ -62,6 +63,7 @@ public class ForecastFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        Log.d(LOG_TAG, "onCreate");
     }
 
     @Override
@@ -159,6 +161,31 @@ public class ForecastFragment extends Fragment {
     public void onStart() {
         super.onStart();
         updateWeather();
+        Log.d(LOG_TAG, "onStart");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(LOG_TAG, "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(LOG_TAG, "onStop");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(LOG_TAG, "onResume");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(LOG_TAG, "onDestroy");
     }
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
