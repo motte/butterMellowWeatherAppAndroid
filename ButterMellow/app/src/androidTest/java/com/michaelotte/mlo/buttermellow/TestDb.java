@@ -123,7 +123,6 @@ public class TestDb extends AndroidTestCase {
 
             long weatherRowId;
             weatherRowId = db.insert(WeatherEntry.TABLE_NAME, null, weatherValues);
-            Log.d(LOG_TAG, "TestDb - " + weatherRowId);
 
             assertTrue(weatherRowId != -1);
             Log.d(LOG_TAG, "TestDb - New weather row ID: " + weatherRowId);
