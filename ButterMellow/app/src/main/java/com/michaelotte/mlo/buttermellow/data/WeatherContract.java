@@ -1,5 +1,7 @@
 package com.michaelotte.mlo.buttermellow.data;
 
+import android.content.ContentUris;
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -9,8 +11,34 @@ import android.provider.BaseColumns;
  * A db contract is an agreement between db and views on how all the db info are stored
  */
 public class WeatherContract {
+    // The "Content authority" is a name for the entire content provider.
+    // A convenient string to use for the content authority is the package name for the app,
+    // which is guaranteed to be unique on the device.
+    public static final String CONTENT_AUTHORITY = "com.michaelotte.mlo.buttermellow.app";
+
+    // Use CONTENT_AUTHORITY to create the base of all URI's which apps will use to contact the
+    // content provider
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+    // Possible paths (appended to base content URI for possible URI's)
+    // Essentially our tables
+    public static final String PATH_WEATHER = "weather";
+    public static final String PATH_LOCATION = "location";
+
     /* Inner class that defines the table contents of the weather table */
     public static final class LocationEntry implements BaseColumns {
+        // base location for the location table
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION)
+                .build();
+
+        // values to the location and weather contracts
+        // MIMETYPE prefixes to tell to return dir/list or single item
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" + CONTENT_AUTHORITY +
+                "/" + PATH_LOCATION;
+
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" +
+                CONTENT_AUTHORITY + "/" + PATH_LOCATION;
+
         // Unique table name
         public static final String TABLE_NAME = "location";
 
@@ -23,9 +51,24 @@ public class WeatherContract {
         // Lat and Lon for the city to pin point in map intent
         public static final String COLUMN_COORD_LAT = "coord_lat";
         public static final String COLUMN_COORD_LON = "coord_lon";
+
+        // this queries the Location table by id
+        public static Uri buildLocationUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
     }
     /* Inner class that defines the table contents of the weather table */
     public static final class WeatherEntry implements BaseColumns {
+        // base location/path for weather table
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_WEATHER).build();
+
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" + CONTENT_AUTHORITY +
+                "/" + PATH_WEATHER;
+
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" +
+                CONTENT_AUTHORITY + "/" + PATH_WEATHER;
+
         // Unique table name
         public static final String TABLE_NAME = "weather";
 
@@ -50,8 +93,43 @@ public class WeatherContract {
         public static final String COLUMN_HUMIDITY = "humidity";
         public static final String COLUMN_PRESSURE = "pressure";
         public static final String COLUMN_WIND_SPEED = "wind_speed";
-        public static final String COLUMN_DEGREES = "units";
+        // Degrees are meteorological degrees (e.g. 0 is north 180 is south). Stored as float
+        public static final String COLUMN_DEGREES = "degrees";
 
+        /*
+        URI Builders and Decoder functions - good for keeping the actual URI encoding in Contract
+         */
+        // If using integer primary key in weather table only (common)
+        public static Uri buildWeatherUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildWeatherLocationUri(String locationSetting) {
+            return CONTENT_URI.buildUpon().appendPath(locationSetting).build();
+        }
+
+        // builds two part URI with location and date segments
+        public static Uri buildWeatherLocationWithStartDate(
+                String locationSetting, String startDate) {
+            return CONTENT_URI.buildUpon().appendPath(locationSetting)
+                    .appendQueryParameter(COLUMN_DATETEXT, startDate).build();
+        }
+
+        /*
+        These are helper functions to decode the URI structure to also hide the
+        URI encoding/structure in Contract
+         */
+        public static String getLocationSettingFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
+        }
+
+        public static String getDateFromUri(Uri uri) {
+            return uri.getPathSegments().get(2);
+        }
+
+        public static String getStartDateFromUri(Uri uri) {
+            return uri.getQueryParameter(COLUMN_DATETEXT);
+        }
 
         /**
          * The unique ID for a row
