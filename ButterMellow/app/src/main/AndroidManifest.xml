@@ -32,7 +32,9 @@
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.michaelotte.mlo.buttermellow.MainActivity" />
         </activity>
-
+        <provider
+            android:authorities="com.michaelotte.mlo.buttermellow.app"
+            android:name="com.michaelotte.mlo.buttermellow.data.WeatherProvider" />
     </application>
 
 </manifest>
