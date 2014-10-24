@@ -3,29 +3,27 @@ package com.michaelotte.mlo.buttermellow;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
 import android.test.AndroidTestCase;
 import android.util.Log;
+
+import com.michaelotte.mlo.buttermellow.data.WeatherContract.LocationEntry;
+import com.michaelotte.mlo.buttermellow.data.WeatherContract.WeatherEntry;
+import com.michaelotte.mlo.buttermellow.data.WeatherDbHelper;
 
 import java.util.Map;
 import java.util.Set;
 
-import com.michaelotte.mlo.buttermellow.data.WeatherContract.WeatherEntry;
-import com.michaelotte.mlo.buttermellow.data.WeatherContract.LocationEntry;
-import com.michaelotte.mlo.buttermellow.data.WeatherDbHelper;
-
 /**
  * Created by michael on 10/20/14.
  */
-public class TestDb extends AndroidTestCase {
-    private static String LOG_TAG = TestDb.class.getSimpleName();
+public class TestProvider extends AndroidTestCase {
+    private static String LOG_TAG = TestProvider.class.getSimpleName();
     public String TEST_CITY_NAME = "Philadelphia";
 
-    public void testCreateDb() throws Throwable {
+    public void testDeleteDb() throws Throwable {
         // Delete/clean database first
         mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
-        SQLiteDatabase db = new WeatherDbHelper(this.mContext).getWritableDatabase();
-        assertEquals(true, db.isOpen());
-        db.close();
     }
 
     // Make sure that everything in our content matches our insert
@@ -43,6 +41,34 @@ public class TestDb extends AndroidTestCase {
             // will always fail for float-integers.
             assertEquals(expectedValue, valueCursor.getString(idx));
         }
+    }
+
+    public void testGetType() {
+        // content://com.michaelotte.mlo.buttermellow.app/weather/
+        String type = mContext.getContentResolver().getType(WeatherEntry.CONTENT_URI);
+        // vnd.android.cursor.dir/com.michaelotte.mlo.buttermellow.app/weather
+        assertEquals(WeatherEntry.CONTENT_TYPE, type);
+
+        String testLocation = "4560349";
+        // content://com.michaelotte.mlo.buttermellow.app/weather/4560349
+        type = mContext.getContentResolver().getType(WeatherEntry.buildWeatherLocationUri(testLocation));
+        // vnd.android.cursor.dir/com.michaelotte.mlo.buttermellow.app/weather
+        assertEquals(WeatherEntry.CONTENT_TYPE, type);
+
+        String testDate = "20141021";
+        // content://com.michaelotte.mlo.buttermellow.app/4560349/20141021
+        type = mContext.getContentResolver().getType(WeatherEntry.buildWeatherLocationWithStartDate(testLocation, testDate));
+        assertEquals(WeatherEntry.CONTENT_TYPE, type);
+
+        // content://com.michaelotte.mlo.buttermellow.app/location/
+        type = mContext.getContentResolver().getType(LocationEntry.CONTENT_URI);
+        // vnd.android.cursor.dir/com.michaelotte.mlo.buttermellow.app/location
+        assertEquals(LocationEntry.CONTENT_TYPE, type);
+
+        // content://com.michaelotte.mlo.buttermellow.app/location/1
+        type = mContext.getContentResolver().getType(LocationEntry.buildLocationUri(1L));
+        // vnd.android.cursor.item/com.michaelotte.mlo.buttermellow.app/location
+        assertEquals(LocationEntry.CONTENT_ITEM_TYPE, type);
     }
 
     ContentValues getTestLocationContentValues() {

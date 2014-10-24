@@ -24,6 +24,9 @@ public class WeatherProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
+    // instance variable for database helper
+    private WeatherDbHelper mOpenHelper;
+
     private static UriMatcher buildUriMatcher() {
         // Could use regex instead of UriMatcher
         // All paths added to UriMatcher has a corresponding code to return when a match is found.
@@ -48,7 +51,9 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        return false;
+        mOpenHelper = new WeatherDbHelper(getContext());
+        // return true to show that content provider initialized successfully
+        return true;
     }
 
     @Override
@@ -58,7 +63,24 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        return null;
+        /***
+         * returns mimetype of the data associated with the given uri
+         */
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case WEATHER_WITH_LOCATION_AND_DATE:
+                return WeatherContract.WeatherEntry.CONTENT_ITEM_TYPE;
+            case WEATHER_WITH_LOCATION:
+                return WeatherContract.WeatherEntry.CONTENT_TYPE;
+            case WEATHER:
+                return WeatherContract.WeatherEntry.CONTENT_TYPE;
+            case LOCATION:
+                return WeatherContract.LocationEntry.CONTENT_TYPE;
+            case LOCATION_ID:
+                return WeatherContract.LocationEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
     }
 
     @Override

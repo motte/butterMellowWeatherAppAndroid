@@ -33,11 +33,11 @@ public class WeatherContract {
 
         // values to the location and weather contracts
         // MIMETYPE prefixes to tell to return dir/list or single item
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/" + CONTENT_AUTHORITY +
-                "/" + PATH_LOCATION;
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
 
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/" +
-                CONTENT_AUTHORITY + "/" + PATH_LOCATION;
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
 
         // Unique table name
         public static final String TABLE_NAME = "location";
