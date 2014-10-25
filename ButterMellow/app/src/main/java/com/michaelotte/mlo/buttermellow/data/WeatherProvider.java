@@ -51,6 +51,9 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        /**
+         * onCreate of this contentprovider
+         */
         mOpenHelper = new WeatherDbHelper(getContext());
         // return true to show that content provider initialized successfully
         return true;
@@ -64,7 +67,7 @@ public class WeatherProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         /***
-         * returns mimetype of the data associated with the given uri
+         * getType method returns mimetype of the data associated with the given uri
          */
         final int match = sUriMatcher.match(uri);
         switch (match) {

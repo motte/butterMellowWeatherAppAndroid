@@ -98,6 +98,7 @@ public class WeatherContract {
 
         /*
         URI Builders and Decoder functions - good for keeping the actual URI encoding in Contract
+        - These functions build the URI to retrieve different information from sqlite
          */
         // If using integer primary key in weather table only (common)
         public static Uri buildWeatherUri(long id) {
