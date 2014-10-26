@@ -1,10 +1,12 @@
 package com.michaelotte.mlo.buttermellow;
 
 import android.annotation.TargetApi;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.test.AndroidTestCase;
 import android.util.Log;
@@ -38,13 +40,10 @@ public class TestProvider extends AndroidTestCase {
 
         //If there's an error in the massive SQL table
         // errors will be thrown where you try to get a value
-        WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
         ContentValues testValues = TestDb.getTestLocationContentValues();
 
-        long locationRowId;
-        locationRowId = db.insert(LocationEntry.TABLE_NAME, null, testValues);
+        Uri locationUri = mContext.getContentResolver().insert(LocationEntry.CONTENT_URI, testValues);
+        long locationRowId = ContentUris.parseId(locationUri);
 
         // verify we got a row back
         assertTrue(locationRowId != -1);
@@ -73,11 +72,10 @@ public class TestProvider extends AndroidTestCase {
 
         ContentValues weatherValues = TestDb.getTestWeatherContentValues(locationRowId);
 
-        long weatherRowId;
-        weatherRowId = db.insert(WeatherEntry.TABLE_NAME, null, weatherValues);
+        Uri weatherInsertUri = mContext.getContentResolver().insert(WeatherEntry.CONTENT_URI, weatherValues);
 
-        assertTrue(weatherRowId != -1);
-        Log.d(LOG_TAG, "TestDb - New weather row ID: " + weatherRowId);
+        assertTrue(weatherInsertUri != null);
+        Log.d(LOG_TAG, "TestDb - New weather URI ID: " + weatherInsertUri);
 
         // get the contentresolver and queries the content_uri
         Cursor wCursor = mContext.getContentResolver().query(
@@ -115,8 +113,6 @@ public class TestProvider extends AndroidTestCase {
         );
 
         TestDb.validateCursor(weatherValues, wCursor);
-
-        dbHelper.close();
     }
 
     public void testGetType() {

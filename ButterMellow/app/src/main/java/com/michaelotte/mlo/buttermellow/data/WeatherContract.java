@@ -28,8 +28,7 @@ public class WeatherContract {
     /* Inner class that defines the table contents of the weather table */
     public static final class LocationEntry implements BaseColumns {
         // base location for the location table
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION)
-                .build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION).build();
 
         // values to the location and weather contracts
         // MIMETYPE prefixes to tell to return dir/list or single item
