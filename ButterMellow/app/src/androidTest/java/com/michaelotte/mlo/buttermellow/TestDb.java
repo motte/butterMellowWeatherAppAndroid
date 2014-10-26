@@ -18,7 +18,8 @@ import com.michaelotte.mlo.buttermellow.data.WeatherDbHelper;
  */
 public class TestDb extends AndroidTestCase {
     private static String LOG_TAG = TestDb.class.getSimpleName();
-    public String TEST_CITY_NAME = "Philadelphia";
+    public static final String TEST_LOCATION_SETTING = "4560349";
+    public static final String TEST_DATE = "20141021";
 
     public void testCreateDb() throws Throwable {
         // Delete/clean database first
@@ -31,8 +32,6 @@ public class TestDb extends AndroidTestCase {
     // Make sure that everything in our content matches our insert
     static public void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
         Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
-
-        //
         for (Map.Entry<String, Object> entry: valueSet) {
             String columnName = entry.getKey();
             int idx = valueCursor.getColumnIndex(columnName);
@@ -45,24 +44,24 @@ public class TestDb extends AndroidTestCase {
         }
     }
 
-    ContentValues getTestLocationContentValues() {
+    static public ContentValues getTestLocationContentValues() {
+        String testCityName = "Philadelphia";
         // Test data we're going to insert into the DB
-        String testLocationSetting = "4560349";
         double testLatitude = 39.9523;
         double testLongitude = -75.1625;
 
         // Create a new map of values where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(LocationEntry.COLUMN_CITY_NAME, TEST_CITY_NAME);
-        values.put(LocationEntry.COLUMN_LOCATION_SETTING, testLocationSetting);
+        values.put(LocationEntry.COLUMN_CITY_NAME, testCityName);
+        values.put(LocationEntry.COLUMN_LOCATION_SETTING, TEST_LOCATION_SETTING);
         values.put(LocationEntry.COLUMN_COORD_LAT, testLatitude);
         values.put(LocationEntry.COLUMN_COORD_LON, testLongitude);
         return values;
     }
 
-    ContentValues getTestWeatherContentValues(long locationRowId) {
+    static public ContentValues getTestWeatherContentValues(long locationRowId) {
         // Now that we have location, add some weather!
-        String testDate = "20141021";
+        String testDate = TEST_DATE;
         double testDegrees = 1.2;
         double testHumidity = 1.3;
         double testPressure = 1.4;
