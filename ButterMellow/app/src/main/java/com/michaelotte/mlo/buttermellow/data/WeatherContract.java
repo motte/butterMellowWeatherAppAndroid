@@ -113,6 +113,10 @@ public class WeatherContract {
                     .appendQueryParameter(COLUMN_DATETEXT, startDate).build();
         }
 
+        public static Uri buildWeatherLocationWithDate(String locationSetting, String date) {
+            return CONTENT_URI.buildUpon().appendPath(locationSetting).appendPath(date).build();
+        }
+
         /*
         These are helper functions to decode the URI structure to also hide the
         URI encoding/structure in Contract

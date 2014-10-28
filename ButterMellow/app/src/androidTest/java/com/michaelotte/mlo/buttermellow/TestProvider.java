@@ -27,6 +27,8 @@ import java.util.Set;
 public class TestProvider extends AndroidTestCase {
     private static String LOG_TAG = TestProvider.class.getSimpleName();
     public String TEST_CITY_NAME = "Philadelphia";
+    public static String TEST_LOCATION = "4560349";
+    public static String TEST_DATE = "20141021";
 
     public void testDeleteDb() throws Throwable {
         // Delete/clean database first
@@ -89,7 +91,67 @@ public class TestProvider extends AndroidTestCase {
                 null // sort order
         );
 
-        TestDb.validateCursor(weatherValues, wCursor);
+        if (wCursor.moveToFirst()) {
+            TestDb.validateCursor(weatherValues, wCursor);
+        } else {
+            fail("No weather data returned!");
+        }
+
+        // good convention to close one cursor before using it again
+        wCursor.close();
+
+        // second weather query
+        wCursor = mContext.getContentResolver().query(WeatherEntry.buildWeatherLocationUri(TEST_LOCATION),
+                null, // leaving "columns" null just returns all the columns
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null // sort order
+        );
+
+        if (wCursor.moveToFirst()) {
+            TestDb.validateCursor(weatherValues, wCursor);
+        } else {
+            fail("No weather data returned!");
+        }
+
+        // good convention to close one cursor before using it again
+        wCursor.close();
+
+        // third weather query - you can also test this query is functioning properly by adding a
+        // different TEST_DATE that is in the future/not in the db
+        wCursor = mContext.getContentResolver().query(WeatherEntry.buildWeatherLocationWithStartDate(TEST_LOCATION, TEST_DATE),
+                null, // leaving "columns" null just returns all the columns
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null // sort order
+        );
+
+        if (wCursor.moveToFirst()) {
+            TestDb.validateCursor(weatherValues, wCursor);
+        } else {
+            fail("No weather data returned!");
+        }
+
+        // good convention to close one cursor before using it again
+        wCursor.close();
+
+        // third weather query - you can also test this query is functioning properly by adding a
+        // different TEST_DATE that is in the future/not in the db
+        wCursor = mContext.getContentResolver().query(WeatherEntry.buildWeatherLocationWithDate(TEST_LOCATION, TEST_DATE),
+                null, // leaving "columns" null just returns all the columns
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null // sort order
+        );
+
+        if (wCursor.moveToFirst()) {
+            TestDb.validateCursor(weatherValues, wCursor);
+        } else {
+            fail("No weather data returned!");
+        }
+
+        // good convention to close one cursor before using it again
+        wCursor.close();
 
         dbHelper.close();
     }
@@ -100,13 +162,13 @@ public class TestProvider extends AndroidTestCase {
         // vnd.android.cursor.dir/com.michaelotte.mlo.buttermellow.app/weather
         assertEquals(WeatherEntry.CONTENT_TYPE, type);
 
-        String testLocation = "4560349";
+        String testLocation = TEST_LOCATION;
         // content://com.michaelotte.mlo.buttermellow.app/weather/4560349
         type = mContext.getContentResolver().getType(WeatherEntry.buildWeatherLocationUri(testLocation));
         // vnd.android.cursor.dir/com.michaelotte.mlo.buttermellow.app/weather
         assertEquals(WeatherEntry.CONTENT_TYPE, type);
 
-        String testDate = "20141021";
+        String testDate = TEST_DATE;
         // content://com.michaelotte.mlo.buttermellow.app/4560349/20141021
         type = mContext.getContentResolver().getType(WeatherEntry.buildWeatherLocationWithStartDate(testLocation, testDate));
         assertEquals(WeatherEntry.CONTENT_TYPE, type);
