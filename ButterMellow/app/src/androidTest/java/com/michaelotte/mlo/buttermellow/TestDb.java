@@ -31,6 +31,8 @@ public class TestDb extends AndroidTestCase {
 
     // Make sure that everything in our content matches our insert
     static public void validateCursor(ContentValues expectedValues, Cursor valueCursor) {
+        assertTrue(valueCursor.moveToFirst());
+
         Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
         for (Map.Entry<String, Object> entry: valueSet) {
             String columnName = entry.getKey();
@@ -42,6 +44,7 @@ public class TestDb extends AndroidTestCase {
             // will always fail for float-integers.
             assertEquals(expectedValue, valueCursor.getString(idx));
         }
+        valueCursor.close();
     }
 
     static public ContentValues getTestLocationContentValues() {
