@@ -40,15 +40,12 @@ public class TestProvider extends AndroidTestCase {
          * Test if location and weather data can be added to the location and weather tables
          */
 
-        //If there's an error in the massive SQL table
-        // errors will be thrown where you try to get a value
-       WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
         ContentValues testValues = TestDb.getTestLocationContentValues();
 
-        long locationRowId;
-        locationRowId = db.insert(LocationEntry.TABLE_NAME, null, testValues);
+        // getcontentresolver gets stuff from content provider
+        Uri locationUri = mContext.getContentResolver().
+                insert(LocationEntry.CONTENT_URI, testValues);
+        long locationRowId = ContentUris.parseId(locationUri);
 
         // verify we got a row back
         assertTrue(locationRowId != -1);
@@ -65,6 +62,7 @@ public class TestProvider extends AndroidTestCase {
 
         TestDb.validateCursor(testValues, cursor);
 
+        // mContext.getContentResolver() always gets information from the content provider
         cursor = mContext.getContentResolver().query(
                 LocationEntry.buildLocationUri(locationRowId),
                 null,
@@ -77,9 +75,10 @@ public class TestProvider extends AndroidTestCase {
 
         ContentValues weatherValues = TestDb.getTestWeatherContentValues(locationRowId);
 
-        long weatherRowId = db.insert(WeatherEntry.TABLE_NAME, null, weatherValues);
+        Uri insertUri = mContext.getContentResolver().insert(WeatherEntry.CONTENT_URI, weatherValues);
+        // doesn't return unless true
+        long weatherRowId = ContentUris.parseId(insertUri);
 
-        assertTrue(weatherRowId != -1);
         Log.d(LOG_TAG, "TestDb - New weather URI ID: " + weatherRowId);
 
         // get the contentresolver and queries the content_uri
@@ -153,7 +152,6 @@ public class TestProvider extends AndroidTestCase {
         // good convention to close one cursor before using it again
         wCursor.close();
 
-        dbHelper.close();
     }
 
     public void testGetType() {

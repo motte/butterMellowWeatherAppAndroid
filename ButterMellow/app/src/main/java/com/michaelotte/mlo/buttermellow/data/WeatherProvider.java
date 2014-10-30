@@ -225,7 +225,7 @@ public class WeatherProvider extends ContentProvider {
 
         switch (match) {
             case WEATHER: {
-                long _id = db.insert(WeatherContract.WeatherEntry.TABLE_NAME, null, contentValues);
+                long _id = db.insert(WeatherContract.WeatherEntry.TABLE_NAME, null, values);
                 if (_id > 0)
                     returnUri = WeatherContract.WeatherEntry.buildWeatherUri(_id);
                 else
@@ -233,11 +233,18 @@ public class WeatherProvider extends ContentProvider {
                 break;
             }
             case LOCATION: {
+                long _id = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, values);
+                if (_id > 0)
+                    returnUri = WeatherContract.LocationEntry.buildLocationUri(_id);
+                else
+                    throw new SQLException("Failed to insert row into " + uri);
                 break;
             }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
+        // notify when there is a change in uri
+        getContext().getContentResolver().notifyChange(uri, null);
         return returnUri;
     }
 
