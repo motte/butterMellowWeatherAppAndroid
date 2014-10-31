@@ -30,9 +30,15 @@ public class TestProvider extends AndroidTestCase {
     public static String TEST_LOCATION = "4560349";
     public static String TEST_DATE = "20141021";
 
-    public void testDeleteDb() throws Throwable {
-        // Delete/clean database first
-        mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
+//    public void testDeleteDb() throws Throwable {
+//        // Delete/clean database first
+//        mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
+//    }
+
+    // We want each test to start with a clean slate, run testDeleteAllRecords in seutUp,
+    // setUp is called by the test runner before each test
+    public void setUp() {
+        deleteAllRecords();
     }
 
     public void testInsertReadProvider() {
@@ -43,8 +49,7 @@ public class TestProvider extends AndroidTestCase {
         ContentValues testValues = TestDb.getTestLocationContentValues();
 
         // getcontentresolver gets stuff from content provider
-        Uri locationUri = mContext.getContentResolver().
-                insert(LocationEntry.CONTENT_URI, testValues);
+        Uri locationUri = mContext.getContentResolver().insert(LocationEntry.CONTENT_URI, testValues);
         long locationRowId = ContentUris.parseId(locationUri);
 
         // verify we got a row back
@@ -180,6 +185,81 @@ public class TestProvider extends AndroidTestCase {
         type = mContext.getContentResolver().getType(LocationEntry.buildLocationUri(1L));
         // vnd.android.cursor.item/com.michaelotte.mlo.buttermellow.app/location
         assertEquals(LocationEntry.CONTENT_ITEM_TYPE, type);
+    }
+
+    // brings database back to an empty state
+    public void deleteAllRecords() {
+        mContext.getContentResolver().delete(
+                WeatherEntry.CONTENT_URI,
+                null, // null query deletes every item
+                null
+        );
+        mContext.getContentResolver().delete(
+                LocationEntry.CONTENT_URI,
+                null, // null query deletes all items
+                null
+        );
+
+        Cursor cursor = mContext.getContentResolver().query(
+                WeatherEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+
+        assertEquals(cursor.getCount(), 0);
+        cursor.close();
+
+        cursor = mContext.getContentResolver().query(
+                LocationEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+
+        assertEquals(cursor.getCount(), 0);
+        cursor.close();
+
+    }
+
+    public void testUpdateLocation() {
+        // Create a new map of values, where column names are the keys
+        ContentValues values = TestDb.getTestLocationContentValues();
+
+        Uri locationUri = mContext.getContentResolver().insert(LocationEntry.CONTENT_URI, values);
+        long locationRowId = ContentUris.parseId(locationUri);
+
+        // verify we got a row back
+        assertTrue(locationRowId != -1);
+        Log.d(LOG_TAG, "New row id: " + locationRowId);
+
+        ContentValues updatedValues = new ContentValues(values);
+        updatedValues.put(LocationEntry._ID, locationRowId);
+        updatedValues.put(LocationEntry.COLUMN_CITY_NAME, "Philadelphia");
+
+        int count = mContext.getContentResolver().update(
+                LocationEntry.CONTENT_URI, updatedValues, LocationEntry._ID + "= ?",
+                new String[] {Long.toString(locationRowId)});
+
+        assertEquals(count, 1);
+
+        // A cursor is your primary interface to the query results
+        Cursor cursor = mContext.getContentResolver().query(
+                LocationEntry.buildLocationUri(locationRowId),
+                null,
+                null, // columns for the "where" clause
+                null, // values for the "where" clause
+                null // sort order
+        );
+
+        TestDb.validateCursor(updatedValues, cursor);
+    }
+
+    // make sure we can still delete after adding/updating stuff
+    public void testDeleteRecordsAtEnd() {
+        deleteAllRecords();
     }
 
     // The target api annotation is needed for the call to keySet -- we wouldn't want
