@@ -84,8 +84,6 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
         String[] forecastArray = {
                 "Today - Sunny - 88/63",
                 "Tomorrow - NOOOOO stay inside - 0/-10",
@@ -118,6 +116,8 @@ public class ForecastFragment extends Fragment {
                         // Forecast data in an array
                         weekForecast);
 
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
         ListView listView = (ListView) rootView.findViewById(
                 R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
@@ -141,20 +141,8 @@ public class ForecastFragment extends Fragment {
     }
 
     private void updateWeather() {
-        FetchWeatherTask weatherTask = new FetchWeatherTask();
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-        String location = sharedPrefs.getString(getString(R.string.pref_location_key),
-                getString(R.string.pref_default_location));
-        String units = sharedPrefs.getString(getString(R.string.pref_units_key),
-                getString(R.string.pref_units_default));
-        weatherTask.execute(location, units);
-
-        // Save the latLon for the map menu option
-        SharedPreferences.Editor editor = sharedPrefs.edit();
-        editor.putString("latLon", latLon);
-        editor.apply();
-        Toast.makeText(getActivity(), latLon, Toast.LENGTH_LONG).show();
+        String location = Utility.getPreferredLocation(getActivity());
+        new FetchWeatherTask(getActivity(), mForecastAdapter).execute(location);
     }
 
     @Override
@@ -188,104 +176,5 @@ public class ForecastFragment extends Fragment {
         Log.d(LOG_TAG, "onDestroy");
     }
 
-    public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
-        private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
-
-        @Override
-        protected void onPostExecute(String[] result) {
-            /**
-             * Initialize new forecast data after data is retrieved from OWM API
-             */
-            if (result != null) {
-                mForecastAdapter.clear();
-                for (String dayForecastStr : result) {
-                    mForecastAdapter.add(dayForecastStr);
-                }
-            }
-        }
-
-        @Override
-        protected String[] doInBackground(String... params) {
-            // If there's no zip code, there's nothing to look up.  Verify size of params.
-            if (params.length == 0) {
-                return null;
-            }
-
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            String forecastJsonStr = null;
-
-            String format = "json";
-            int numDays = 7;
-
-            try {
-                final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?";
-                final String ID_PARAM = "id";
-                final String FORMAT_PARAM = "mode";
-                final String UNITS_PARAM = "units";
-                final String DAYS_PARAM = "cnt";
-
-                Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
-                        .appendQueryParameter(ID_PARAM, params[0])
-                        .appendQueryParameter(FORMAT_PARAM, format)
-                        .appendQueryParameter(UNITS_PARAM, params[1])
-                        .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
-                        .build();
-
-                URL url = new URL(builtUri.toString());
-
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // nothing needs to happen after this so just return null
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty. No need to parse
-                    return null;
-                }
-                forecastJsonStr = buffer.toString();
-
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "ForecastFragment 119 Error ", e);
-
-                return null;
-            } finally{
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "ForecastFragment 130 Error closing stream", e);
-                    }
-                }
-            }
-
-            try {
-                WeatherDataParser WDP = new WeatherDataParser();
-                latLon = WDP.getCityDataFromJson(forecastJsonStr);
-                return WDP.getWeatherDataFromJson(forecastJsonStr, numDays);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-    }
 }
