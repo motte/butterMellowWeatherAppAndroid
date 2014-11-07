@@ -86,21 +86,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         return highLowStr;
     }
 
-    @Override
-    protected void onPostExecute(String[] result) {
-        /**
-         * Initialize new forecast data after data is retrieved from OWM API
-         * This part actually takes the new weather data and creates the views for them
-         * the mForecastAdapter was initialized in the ForecastFragment
-         */
-        if (result != null) {
-            mForecastAdapter.clear();
-            for (String dayForecastStr : result) {
-                mForecastAdapter.add(dayForecastStr);
-            }
-        }
-    }
-
     private long addLocation(String locationSetting, String cityName, double lat, double lon) {
         Log.v (LOG_TAG, "inserting " + cityName + ", with coord: " + lat + ", " + lon);
 
@@ -294,5 +279,20 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         }
 
         return null;
+    }
+
+    @Override
+     protected void onPostExecute(String[] result) {
+        /**
+         * Initialize new forecast data after data is retrieved from OWM API
+         * This part actually takes the new weather data and creates the views for them
+         * the mForecastAdapter was initialized in the ForecastFragment
+         */
+        if (result != null) {
+            mForecastAdapter.clear();
+            for (String dayForecastStr : result) {
+                mForecastAdapter.add(dayForecastStr);
+            }
+        }
     }
 }
