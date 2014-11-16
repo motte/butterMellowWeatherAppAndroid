@@ -193,13 +193,22 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
-                // Launch the detailActivity intent
-                // Intents help two disparate components of an app or outside an app to be connected
-                // Here's an explicit intent to open up the DetailActivity View
-                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, "placeholder");
-                startActivity(detailIntent);
+                SimpleCursorAdapter adapter = (SimpleCursorAdapter) adapterView.getAdapter();
+                Cursor cursor = adapter.getCursor();
+                if (null != cursor && cursor.moveToPosition(position)) {
+                    boolean isMetric = Utility.isMetric(getActivity());
+                    String forecast = String.format("%s - %s - %s/%s",
+                            Utility.formatDate(cursor.getString(COL_WEATHER_DATE)),
+                            cursor.getString(COL_WEATHER_DESC),
+                            Utility.formatTemperature(cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric),
+                            Utility.formatTemperature(cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
+                    // Launch the detailActivity intent
+                    // Intents help two disparate components of an app or outside an app to be connected
+                    // Here's an explicit intent to open up the DetailActivity View
+                    Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+                            .putExtra(Intent.EXTRA_TEXT, forecast);
+                    startActivity(detailIntent);
+                }
             }
         });
 
