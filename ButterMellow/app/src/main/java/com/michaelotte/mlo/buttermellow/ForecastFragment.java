@@ -1,6 +1,5 @@
 package com.michaelotte.mlo.buttermellow;
 
-import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.michaelotte.mlo.buttermellow.data.WeatherContract;
@@ -58,7 +59,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     /**
      * Global mForecastAdapter data
      */
-    private ArrayAdapter<String> mForecastAdapter;
+    private SimpleCursorAdapter mForecastAdapter;
 
     private String mLocation;
 
@@ -86,14 +87,6 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     public static final int COL_LOCATION_SETTING = 5;
 
     public ForecastFragment() {
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        // loaders are initialized in onActivityCreated because their lifecycle is bound to the activity, not the fragment
-        super.onActivityCreated(savedInstanceState);
-        // notice I use the loader id (FORECAST_LOADER)
-        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
     }
 
     /**
@@ -148,14 +141,47 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
          * It also considers the orders of the views
          * This will pass along the view information to the bound view itself
          */
-        mForecastAdapter =
-                new ArrayAdapter<String>(
-                        // The current context (this fragment's parent activity that are global)
-                        getActivity(),
-                        R.layout.list_item_forecast,
+        mForecastAdapter = new SimpleCursorAdapter(
+                // The current context (this fragment's parent activity that are global)
+                getActivity(),
+                R.layout.list_item_forecast,
+                null,
+                // these column names
+                new String[]{WeatherContract.WeatherEntry.COLUMN_DATETEXT,
+                        WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+                        WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+                        WeatherContract.WeatherEntry.COLUMN_MIN_TEMP
+                },
+                new int[]{R.id.list_item_date_textview,
                         R.id.list_item_forecast_textview,
-                        // Forecast data in an array
-                        weekForecast);
+                        R.id.list_item_high_textview,
+                        R.id.list_item_low_textview
+                },
+                0
+        );
+
+        mForecastAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                boolean isMetric = Utility.isMetric(getActivity());
+                switch (columnIndex) {
+                    case COL_WEATHER_MAX_TEMP: {}
+                    case COL_WEATHER_MIN_TEMP: {
+                        // we have to do some formatting and possibly a conversion
+                        ((TextView) view).setText(Utility.formatTemperature(
+                                cursor.getDouble(columnIndex), isMetric));
+                        return true;
+                    }
+                    case COL_WEATHER_DATE: {
+                        String dateString = cursor.getString(columnIndex);
+                        TextView dateView = (TextView) view;
+                        dateView.setText(Utility.formatDate(dateString));
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
@@ -166,14 +192,13 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         // setOnItemClickListener sets the click listener to create a new activity
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String forecast = mForecastAdapter.getItem(position);
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 //                Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
                 // Launch the detailActivity intent
                 // Intents help two disparate components of an app or outside an app to be connected
                 // Here's an explicit intent to open up the DetailActivity View
                 Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, forecast);
+                        .putExtra(Intent.EXTRA_TEXT, "placeholder");
                 startActivity(detailIntent);
             }
         });
@@ -181,9 +206,17 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         return rootView;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        // notice I use the loader id (FORECAST_LOADER)
+        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
+        // loaders are initialized in onActivityCreated because their lifecycle is bound to the activity, not the fragment
+        super.onActivityCreated(savedInstanceState);
+    }
+
     private void updateWeather() {
         String location = Utility.getPreferredLocation(getActivity());
-        new FetchWeatherTask(getActivity(), mForecastAdapter).execute(location);
+        new FetchWeatherTask(getActivity()).execute(location);
     }
 
     @Override
@@ -248,12 +281,12 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
+        mForecastAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
+        mForecastAdapter.swapCursor(null);
     }
 }
