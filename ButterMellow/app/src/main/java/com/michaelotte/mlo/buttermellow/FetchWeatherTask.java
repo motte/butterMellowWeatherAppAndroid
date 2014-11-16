@@ -37,6 +37,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     private ArrayAdapter<String> mForecastAdapter;
     private final Context mContext;
 
+    private boolean DEBUG = true;
+
     public FetchWeatherTask(Context context, ArrayAdapter<String> forecastAdapter) {
         mContext = context;
         mForecastAdapter = forecastAdapter;
@@ -86,6 +88,15 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         return highLowStr;
     }
 
+    /**
+     * Helper method to handle insertion of a new location in the weather db
+     *
+     * @param locationSetting - The location string used to request updates from the server
+     * @param cityName - A human-readable city name, e.g. "Santa Cruz"
+     * @param lat - the latitude of the city
+     * @param lon - the longitude of the city
+     * @return the row ID of the added location
+     */
     private long addLocation(String locationSetting, String cityName, double lat, double lon) {
         Log.v (LOG_TAG, "inserting " + cityName + ", with coord: " + lat + ", " + lon);
 
@@ -122,7 +133,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
      * http://api.openweathermap.org/data/2.5/forecast/daily?id=12934&mode=json&units=metric&cnt=7
      * retrieve the maximum temperature for the day indicated by dayIndex
      *
-     * @param forecastJsonStr
+     * @param forecastJsonStr - string of forecast array
      * @param numDays
      * @return resultStrs (array of weather strings)
      * @throws JSONException

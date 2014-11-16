@@ -1,13 +1,19 @@
 package com.michaelotte.mlo.buttermellow;
 
+import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +25,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.michaelotte.mlo.buttermellow.data.WeatherContract;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -40,19 +48,52 @@ import org.json.JSONObject;
  * Created by michael on 10/6/14.
  */
 /**
+ * Encapsulates fetching the forecast and displaying it as a {@link ListView} layout
+ *
  * A placeholder fragment containing a simple view.
  * fragment is a modular container
  */
-public class ForecastFragment extends Fragment {
-    private String latLon;
-    private final String LOG_TAG = ForecastFragment.class.getSimpleName();
+public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor> {
 
     /**
      * Global mForecastAdapter data
      */
     private ArrayAdapter<String> mForecastAdapter;
 
+    private String mLocation;
+
+    // Each loader has an id so that multiple loaders can be running at once
+    private static final int FORECAST_LOADER = 0;
+
+    private final String LOG_TAG = ForecastFragment.class.getSimpleName();
+
+    // Specify the columns we need
+    private static final String[] FORECAST_COLUMNS = {
+            WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
+            WeatherContract.WeatherEntry.COLUMN_DATETEXT,
+            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
+    };
+
+    // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these must change
+    public static final int COL_WEATHER_ID = 0;
+    public static final int COL_WEATHER_DATE = 1;
+    public static final int COL_WEATHER_DESC = 2;
+    public static final int COL_WEATHER_MAX_TEMP = 3;
+    public static final int COL_WEATHER_MIN_TEMP = 4;
+    public static final int COL_LOCATION_SETTING = 5;
+
     public ForecastFragment() {
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        // loaders are initialized in onActivityCreated because their lifecycle is bound to the activity, not the fragment
+        super.onActivityCreated(savedInstanceState);
+        // notice I use the loader id (FORECAST_LOADER)
+        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
     }
 
     /**
@@ -177,4 +218,42 @@ public class ForecastFragment extends Fragment {
     }
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // This is called when a new Loader needs to be created.  This fragment only uses one loader,
+        // so we don't care about checking the id
+
+        // to only show current and future dates, get the String representation for today,
+        // and filter the query to return weather only for dates after or including today.
+        // Only return data after today.
+        String startDate = WeatherContract.getDbDateString(new Date());
+
+        // Sort order: Ascending, by date.
+        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATETEXT + " ASC";
+
+        mLocation = Utility.getPreferredLocation(getActivity());
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                mLocation, startDate);
+
+        // Now create and return a CursorLoader that will take care of creating a Cursor for the
+        // data being displayed.
+        return new CursorLoader(
+                getActivity(),
+                weatherForLocationUri,
+                FORECAST_COLUMNS,
+                null,
+                null,
+                sortOrder
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+
+    }
 }
