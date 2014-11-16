@@ -200,8 +200,8 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
                     String forecast = String.format("%s - %s - %s/%s",
                             Utility.formatDate(cursor.getString(COL_WEATHER_DATE)),
                             cursor.getString(COL_WEATHER_DESC),
-                            Utility.formatTemperature(cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric),
-                            Utility.formatTemperature(cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
+                            Utility.formatTemperature(cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric),
+                            Utility.formatTemperature(cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
                     // Launch the detailActivity intent
                     // Intents help two disparate components of an app or outside an app to be connected
                     // Here's an explicit intent to open up the DetailActivity View
