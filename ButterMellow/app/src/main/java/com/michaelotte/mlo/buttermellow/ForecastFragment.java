@@ -97,7 +97,13 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        Log.d(LOG_TAG, "onCreate");
+        Log.d(LOG_TAG, "onCreate");SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        // Save the latLon for the map menu option
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        // This should be the current lat and lon for the currently set location
+        editor.putString("latLon", "");
+        editor.apply();
     }
 
     @Override
@@ -165,7 +171,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
                 boolean isMetric = Utility.isMetric(getActivity());
                 switch (columnIndex) {
-                    case COL_WEATHER_MAX_TEMP: {}
+                    case COL_WEATHER_MAX_TEMP:
                     case COL_WEATHER_MIN_TEMP: {
                         // we have to do some formatting and possibly a conversion
                         ((TextView) view).setText(Utility.formatTemperature(
@@ -206,7 +212,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
                     // Intents help two disparate components of an app or outside an app to be connected
                     // Here's an explicit intent to open up the DetailActivity View
                     Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                            .putExtra(Intent.EXTRA_TEXT, forecast);
+                            .putExtra(DetailActivity.DATE_KEY, cursor.getString(COL_WEATHER_DATE));
                     startActivity(detailIntent);
                 }
             }
@@ -226,12 +232,17 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     private void updateWeather() {
         String location = Utility.getPreferredLocation(getActivity());
         new FetchWeatherTask(getActivity()).execute(location);
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        // Save the latLon for the map menu option
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString("latLon", "Santa Cruz, CA");
+        editor.apply();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        updateWeather();
         Log.d(LOG_TAG, "onStart");
     }
 
@@ -250,6 +261,9 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     @Override
     public void onResume() {
         super.onResume();
+        if (mLocation != null & !Utility.getPreferredLocation(getActivity()).equals(mLocation)) {
+            getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+        }
         Log.d(LOG_TAG, "onResume");
     }
 
