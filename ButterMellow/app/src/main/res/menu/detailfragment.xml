@@ -5,4 +5,8 @@
         android:title="@string/action_share"
         app:showAsAction="always"
         app:actionProviderClass="android.support.v7.widget.ShareActionProvider" />
+    <item android:id="@+id/action_map"
+        android:icon="@drawable/ic_clear"
+        android:title="@string/action_map"
+        app:showAsAction="collapseActionView" />
 </menu>
