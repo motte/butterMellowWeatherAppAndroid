@@ -260,8 +260,11 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
 
     @Override
     public void onResume() {
+        // check if our weather location has changed
         super.onResume();
         if (mLocation != null & !Utility.getPreferredLocation(getActivity()).equals(mLocation)) {
+            // updateWeather() does not work here because our URI has not changed
+            // so we need to actually reset our loader -> use LoaderManager
             getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
         }
         Log.d(LOG_TAG, "onResume");
@@ -287,6 +290,8 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         // Sort order: Ascending, by date.
         String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATETEXT + " ASC";
 
+        // We've been using an instance variable mLocation to save the preferred location we get when
+        // in onCreateLoader.  This was so we could use this in onResume()
         mLocation = Utility.getPreferredLocation(getActivity());
         Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
                 mLocation, startDate);

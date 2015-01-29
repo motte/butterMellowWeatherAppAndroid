@@ -213,11 +213,13 @@ public class SettingsActivity extends PreferenceActivity
 
         // are we starting the preference activity?
         if (!mBindingPreference) {
+            // if there is a change in location in pref, fetch new weather task
             if (preference.getKey().equals(getString(R.string.pref_location_key))) {
                 FetchWeatherTask weatherTask = new FetchWeatherTask(this);
                 String location = value.toString();
                 weatherTask.execute(location);
             } else {
+                // otherwise notify content URI for our cursor to update
                 // notify code that weather may be impacted
                 getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
             }
