@@ -59,7 +59,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     /**
      * Global mForecastAdapter data
      */
-    private SimpleCursorAdapter mForecastAdapter;
+    private ForecastAdapter mForecastAdapter;
 
     private String mLocation;
 
@@ -147,73 +147,23 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
          * It also considers the orders of the views
          * This will pass along the view information to the bound view itself
          */
-        mForecastAdapter = new SimpleCursorAdapter(
-                // The current context (this fragment's parent activity that are global)
-                getActivity(),
-                R.layout.list_item_forecast,
-                null,
-                // these column names
-                new String[]{WeatherContract.WeatherEntry.COLUMN_DATETEXT,
-                        WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
-                        WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-                        WeatherContract.WeatherEntry.COLUMN_MIN_TEMP
-                },
-                new int[]{R.id.list_item_date_textview,
-                        R.id.list_item_forecast_textview,
-                        R.id.list_item_high_textview,
-                        R.id.list_item_low_textview
-                },
-                0
-        );
-
-        mForecastAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                boolean isMetric = Utility.isMetric(getActivity());
-                switch (columnIndex) {
-                    case COL_WEATHER_MAX_TEMP:
-                    case COL_WEATHER_MIN_TEMP: {
-                        // we have to do some formatting and possibly a conversion
-                        ((TextView) view).setText(Utility.formatTemperature(
-                                cursor.getDouble(columnIndex), isMetric));
-                        return true;
-                    }
-                    case COL_WEATHER_DATE: {
-                        String dateString = cursor.getString(columnIndex);
-                        TextView dateView = (TextView) view;
-                        dateView.setText(Utility.formatDate(dateString));
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
+        mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        ListView listView = (ListView) rootView.findViewById(
-                R.id.listview_forecast);
+        ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
 
         // setOnItemClickListener sets the click listener to create a new activity
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                SimpleCursorAdapter adapter = (SimpleCursorAdapter) adapterView.getAdapter();
-                Cursor cursor = adapter.getCursor();
-                if (null != cursor && cursor.moveToPosition(position)) {
-                    boolean isMetric = Utility.isMetric(getActivity());
-                    String forecast = String.format("%s - %s - %s/%s",
-                            Utility.formatDate(cursor.getString(COL_WEATHER_DATE)),
-                            cursor.getString(COL_WEATHER_DESC),
-                            Utility.formatTemperature(cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric),
-                            Utility.formatTemperature(cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
-                    // Launch the detailActivity intent
-                    // Intents help two disparate components of an app or outside an app to be connected
-                    // Here's an explicit intent to open up the DetailActivity View
-                    Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Cursor cursor = mForecastAdapter.getCursor();
+                if (cursor != null && cursor.moveToPosition(position)) {
+                    Intent intent = new Intent(getActivity(), DetailActivity.class)
                             .putExtra(DetailActivity.DATE_KEY, cursor.getString(COL_WEATHER_DATE));
-                    startActivity(detailIntent);
+                    startActivity(intent);
                 }
             }
         });
